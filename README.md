@@ -3,9 +3,25 @@ i will continue to update this repository with new
 features and feel free to share the features you 
 come up with.
 
-![Iron Man](misc\ironman.png)
+![Iron Man](ironman.png)
 __________________________________________________
 ## Installation
+
+### Create a virtual envionment
+Do this by going to the test2.py and running the terminal
+`python -m venv myenv`
+Then
+
+Windows:
+`myenv\Scripts\activate.bat`
+
+On macOS or Linux:
+`source myenv/bin/activate`
+
+Your virtual environment is now set up and ready to use
+
+To deactivate:
+`deactivate`
 
 ### To install the dependencies run
 `pip install -r requirements.txt` 
