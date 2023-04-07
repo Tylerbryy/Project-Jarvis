@@ -1,0 +1,12 @@
+Interaction 1:
+User input: Jarvis is it true that you know everything
+Jarvis response: ?
+
+Yes, I am capable of understanding and responding to an infinite amount of information.
+
+Interaction 2:
+User input: what's your name
+Jarvis response: ?
+
+My name is Jarvis.
+

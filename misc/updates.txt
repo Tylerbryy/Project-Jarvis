@@ -1,0 +1,10 @@
+1. Can save transaction with simply saying "save transactions"
+2. upgraded the model to gpt 3.5 turbo from davinci
+3. can now have a full convo with jarvis a he can remember past responses and inputs
+4. Live weather data 
+5. Can create simple python apps and run them automatically
+
+Ideas
+
+1. Personalized recommendations
+2. 

@@ -1,0 +1,7 @@
+SpeechRecognition
+openai
+pyttsx3
+requests
+python-dotenv
+pyaudio
+pvporcupine
