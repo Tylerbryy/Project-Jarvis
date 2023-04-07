@@ -3,7 +3,7 @@ i will continue to update this repository with new
 features and feel free to share the features you 
 come up with.
 
-![Iron Man](misc\ironman.png "San Juan Mountains")
+![Iron Man](misc\ironman.png)
 __________________________________________________
 ## Installation
 
