@@ -3,7 +3,6 @@ i will continue to update this repository with new
 features and feel free to share the features you 
 come up with.
 
-![Iron Man](ironman.png)
 __________________________________________________
 ## Installation
 
