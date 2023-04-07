@@ -51,15 +51,15 @@ If you have any ideas on some cool stuff to add i would love the feedback!
 
 __________________________________________________
 
-** Oh, don't forget to follow me on my socials. **
+**Oh, don't forget to follow me on my socials.**
 
-** Instagram **
+**Instagram**
 https://www.instagram.com/tylergbss
 
-** Tiktok **
+**Tiktok**
 https://www.tiktok.com/@tylergbbs
 
-** Twitter **
+**Twitter**
 https://twitter.com/tylerbryy 
 
 
