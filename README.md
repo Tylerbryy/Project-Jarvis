@@ -26,7 +26,8 @@ This file will be the one you set to start on bootup
 
 look in the wakeword.py folder and replace my local paths with your locals paths to the same file
 
-
+### All setup!
+Just run the test2.py file
 __________________________________________________
 
 # Project Jarvis
