@@ -8,7 +8,7 @@ __________________________________________________
 
 ## Installation
 
-### Create a virtual envionment
+### A Virtual Environment is NOT recommended for this project
 insert relevant API Keys and Info into keys.py file
 
 ### Sign up for the weather api and get your longitude and latitude
