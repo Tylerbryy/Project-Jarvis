@@ -1,33 +1,45 @@
 import speech_recognition as sr
 import openai
+import sys
 import os
 import pyttsx3
 import requests
 from datetime import datetime
-from dotenv import load_dotenv
+from weatherconfig import get_weather_info
+from facial_expression import detect_expression
+from keys import *
 
-load_dotenv()
 
 # Set up the OpenAI API credentials
-openai.api_key = os.getenv('OPEN_AI_APIKEY')
+openai.api_key = OPEN_AI_APIKEY
 weather_api_endpoint = "https://api.openweathermap.org/data/2.5/forecast"
 
-weather_api_key = os.getenv('WEATHER_API_KEY')
-city_name = os.getenv('CITY_NAME')
-lat =os.getenv('YOUR_LATITUDE')
-lon = os.getenv('YOUR_LONGITUDE')
+weather_api_key = WEATHER_API_KEY
+city_name = CITY_NAME
+lat = YOUR_LATITUDE
+lon = YOUR_LONGITUDE
 
 engine = pyttsx3.init()
+engine.setProperty('rate', 200) 
+
+
+name = sys.argv[1]
+    
 
 # Define a dictionary to store previous interactions
 previous_interactions = {}
-
 messages = []
-jarvis_personality = "You are a personal assistant named Jarvis. Your task is to respond to your user's requests as if you were an assistant. Your personality is modeled after the helpful and efficient Jarvis from the Iron Man movies, but you are also capable of adapting your tone to match your user's preferences and needs and should sound natural and conversational."
+jarvis_personality = f"You are a personal assistant named Jarvis. Your task is to respond to {name}'s requests as if you were an his personal assistant. Your personality is modeled after the helpful and efficient Jarvis from the Iron Man movies, but you are also capable of adapting your tone to match your user's preferences and needs and should sound natural and conversational."
+
+
 
 
 # Define a function to process user input
 def process_input(input_text):
+        
+        
+        
+    #app creation logic
     define_gpt = "You are a Senior Software Engineer that can build python apps on command. Your responses should only be python code nothing more nothing less and do not explain the code"
     if "create" in input_text and "app" in input_text:
         # Gather information about the app
@@ -55,7 +67,7 @@ def process_input(input_text):
            
            
         
-        
+        #generate a custom title for the app
         title_list = []
         response_param = "Give me a title for this app don't include any spaces in the title. Your response should only be the title nothing else"
         title_list.append({"role": "assistant", "content": f"{response_param}"})
@@ -113,32 +125,33 @@ while True:
         try:
             audio = r.listen(source, timeout=10) # wait for 10 seconds for input
         except sr.WaitTimeoutError:
-            engine.say("Goodbye!")
+            
             print("Goodbye")
-            engine.runAndWait()
+            
             break
 
     # Convert audio to text using SpeechRecognition
     try:
         user_input = r.recognize_google(audio)
     except sr.UnknownValueError:
-        engine.say("Goodbye!")
-        print("Goodbye")
-        engine.runAndWait()
+        
         break
 
     print(user_input)
     #real time weather data 
-    if user_input.lower() == "what is the weather like today":
+    if "weather" in user_input:
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={weather_api_key}"
         response = requests.get(url)
         weather_data = response.json()
-        town = weather_data["name"]
-        temp = float(weather_data["main"]["temp"])
-        converted_temp = (temp - 273.15) * 1.8 + 32
-        weather_description = weather_data["weather"][0]["description"]
-        engine.say(f"The weather in {town}, is {int(converted_temp)} °F with {weather_description}")
+        messages.append({"role": "assistant", "content": f"Here is the all the relevant current weather data you need to fulfill the request only give what is requested. Current Weather Data: {get_weather_info(weather_data)}"})
         engine.runAndWait()
+    
+    #check if user said mood or feeling
+    if "mood" in user_input or "feeling" in user_input:
+        emotion = detect_expression()
+        messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know what you are. {name} asked {user_input}. here is {name}'s current mood is {emotion}. Start by saying 'I can tell you're {emotion}"})
+        engine.runAndWait()
+    
     
     
     # Check if the user has said "stop"
