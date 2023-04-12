@@ -17,7 +17,7 @@ sign up here https://api.openweathermap.org
 find your lat and long here https://www.latlong.net
 put them in the relevant place in the keys.py file
 
-For the wake word to work
+### For the wake word to work
 Sign up for the picoai api at https://picovoice.ai/
 
 then copy and paste it in the relevant position in the wakeword.py file
@@ -30,6 +30,8 @@ look in the wakeword.py folder and replace my local paths with your locals paths
 __________________________________________________
 
 # Project Jarvis
+
+## Features
 
 ### Version 1:
 
@@ -47,6 +49,12 @@ __________________________________________________
 
 - Autonomously create simple apps on command
 - Added the abilty to listen to the keyword Jarvis then use Jarvis (can be ran on startup)
+
+### Version 3: 
+
+- Improved the Weather Functionality
+- Implemented Face Detection upon Bootup to personalize user experience
+- Integrated a Mood Detection Feature for more personalized interactions. Jarvis now listens for keywords such as "mood" and "feeling" to provide relevant responses based on the user's emotional state.
 
 
 If you have any ideas on some cool stuff to add i would love the feedback!
