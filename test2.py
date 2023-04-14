@@ -5,11 +5,13 @@ import os
 import pyttsx3
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
 from weatherconfig import get_weather_info
 from facial_expression import detect_expression
 from keys import *
+from bs4 import BeautifulSoup
 
-
+your_name = "Tyler"
 # Set up the OpenAI API credentials
 openai.api_key = OPEN_AI_APIKEY
 weather_api_endpoint = "https://api.openweathermap.org/data/2.5/forecast"
@@ -22,8 +24,10 @@ lon = YOUR_LONGITUDE
 engine = pyttsx3.init()
 engine.setProperty('rate', 200) 
 
-
-name = sys.argv[1]
+try:
+    name = sys.argv[1]
+except IndexError:
+    name = your_name
     
 
 # Define a dictionary to store previous interactions
@@ -138,6 +142,7 @@ while True:
         break
 
     print(user_input)
+    
     #real time weather data 
     if "weather" in user_input:
         url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={weather_api_key}"
@@ -149,7 +154,16 @@ while True:
     #check if user said mood or feeling
     if "mood" in user_input or "feeling" in user_input:
         emotion = detect_expression()
-        messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know what you are. {name} asked {user_input}. here is {name}'s current mood is {emotion}. Start by saying 'I can tell you're {emotion}"})
+        messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know who you are. {name} asked {user_input}. here is {name}'s current mood is {emotion}. Start by saying 'I can tell you're {emotion}"})
+        engine.runAndWait()
+        
+    #check if user said stock market today
+    if "stock market" in user_input:
+        url = "https://finance.yahoo.com/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, "html.parser")
+        headlines = [headline.text.strip() for headline in soup.find_all("h3")]
+        messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know who you are. {name} asked {user_input}. using these financial headlines aggregate them and answer {name}'s request accordingly and your answers should be somewhat short. : {headlines}"})
         engine.runAndWait()
     
     

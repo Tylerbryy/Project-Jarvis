@@ -1,7 +1,5 @@
-import threading
 import cv2
 import face_recognition
-import pyttsx3
 import time
 
 
@@ -10,14 +8,14 @@ def facerec():
     # Load the known images and encode their face landmarks
 
     # Tyler
-    image_of_tyler = face_recognition.load_image_file(r"C:\Users\tyler\iCloudDrive\Desktop\Jarvis\wakeword\known_faces\Tyler.jpg")
+    image_of_tyler = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\Tyler.jpg")
     tyler_face_encoding = face_recognition.face_encodings(image_of_tyler)[0]
 
     # elon
-    image_of_elon = face_recognition.load_image_file(r"C:\Users\tyler\iCloudDrive\Desktop\Jarvis\wakeword\known_faces\elon.jpg")
+    image_of_elon = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elon.jpg")
     elon_face_encoding = face_recognition.face_encodings(image_of_elon)[0]
 
-    image_of_elise = face_recognition.load_image_file(r"C:\Users\tyler\iCloudDrive\Desktop\Jarvis\wakeword\known_faces\elise.jpg")
+    image_of_elise = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elise.jpg")
     elise_face_encoding = face_recognition.face_encodings(image_of_elise)[0]
 
     # Create a list of known face encodings
@@ -80,3 +78,4 @@ def facerec():
 
     # Release the webcam and close the window
     video_capture.release()
+    

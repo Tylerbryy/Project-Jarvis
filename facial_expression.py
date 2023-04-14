@@ -1,11 +1,18 @@
 import numpy as np
 import cv2
 import tensorflow as tf
+import keras
+from keras.models import load_model
 
+
+# Load the face detection model
+face_detection = cv2.CascadeClassifier(r'D:\OneDrive\Desktop\Jarvis\face_expression_config\haar_cascade_face_detection.xml')
+
+# Load the expression recognition model and labels
+model = load_model(r'D:\OneDrive\Desktop\Jarvis\face_expression_config\network-5Labels.h5')
+labels = ['Surprise', 'Neutral', 'Anger', 'Happy', 'Sad']
 
 def detect_expression():
-
-		face_detection = cv2.CascadeClassifier(r'C:\Users\tyler\iCloudDrive\Desktop\Jarvis\face_expression_config\haar_cascade_face_detection.xml')
 
 		camera = cv2.VideoCapture(0)
 		camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)
@@ -17,8 +24,6 @@ def detect_expression():
 		}
 
 		labels = ['Surprise', 'Neutral', 'Anger', 'Happy', 'Sad']
-
-		model = tf.keras.models.load_model(r'C:\Users\tyler\iCloudDrive\Desktop\Jarvis\face_expression_config\network-5Labels.h5')
 
 		while True:
 			ret, img = camera.read()
