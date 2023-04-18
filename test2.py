@@ -5,11 +5,12 @@ import os
 import pyttsx3
 import requests
 from datetime import datetime
-from dotenv import load_dotenv
 from weatherconfig import get_weather_info
 from facial_expression import detect_expression
 from keys import *
 from bs4 import BeautifulSoup
+import random
+from mail import get_num_unread_emails, get_subject_lines_unread_emails
 
 your_name = "Tyler"
 # Set up the OpenAI API credentials
@@ -22,7 +23,7 @@ lat = YOUR_LATITUDE
 lon = YOUR_LONGITUDE
 
 engine = pyttsx3.init()
-engine.setProperty('rate', 200) 
+engine.setProperty('rate', 190) 
 
 try:
     name = sys.argv[1]
@@ -37,12 +38,10 @@ jarvis_personality = f"You are a personal assistant named Jarvis. Your task is t
 
 
 
-
 # Define a function to process user input
 def process_input(input_text):
         
-        
-        
+    
     #app creation logic
     define_gpt = "You are a Senior Software Engineer that can build python apps on command. Your responses should only be python code nothing more nothing less and do not explain the code"
     if "create" in input_text and "app" in input_text:
@@ -111,6 +110,7 @@ def process_input(input_text):
         
         return reply
 
+
 # Define a function to save previous interactions to a text file
 def save_interactions():
     with open(r'misc', 'w') as f:
@@ -118,8 +118,23 @@ def save_interactions():
             f.write(f'Interaction {i}:\nUser input: {interaction["user_input"]}\nJarvis response: {interaction["jarvis_response"]}\n\n')
 
 # Use SpeechRecognition to recognize audio input
+greeting_messages = {
+    "message1": f"Yes, {name}?",
+    "message2": f"How can I be of service, {name}?",
+    "message3": f"At your service, {name}.",
+    "message4": f"JARVIS here, {name}. How may I be of assistance?",
+    "message5": f"JARVIS online, {name}.",
+    "message6": f"Ready and waiting, {name}."
+    }
+
+def get_random_message(message_dict):
+    
+    random_key = random.choice(list(message_dict.keys()))
+    random_value = message_dict[random_key]
+    return random_value
+
 r = sr.Recognizer()
-engine.say("Jarvis is listening")
+engine.say(get_random_message(message_dict=greeting_messages))
            
 engine.runAndWait()
 
@@ -129,9 +144,8 @@ while True:
         try:
             audio = r.listen(source, timeout=10) # wait for 10 seconds for input
         except sr.WaitTimeoutError:
-            
-            print("Goodbye")
-            
+            engine.say("Goodbye, just call my name if you need anything else")
+            engine.runAndWait()
             break
 
     # Convert audio to text using SpeechRecognition
@@ -149,13 +163,13 @@ while True:
         response = requests.get(url)
         weather_data = response.json()
         messages.append({"role": "assistant", "content": f"Here is the all the relevant current weather data you need to fulfill the request only give what is requested. Current Weather Data: {get_weather_info(weather_data)}"})
-        engine.runAndWait()
+        
     
     #check if user said mood or feeling
     if "mood" in user_input or "feeling" in user_input:
         emotion = detect_expression()
         messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know who you are. {name} asked {user_input}. here is {name}'s current mood is {emotion}. Start by saying 'I can tell you're {emotion}"})
-        engine.runAndWait()
+        
         
     #check if user said stock market today
     if "stock market" in user_input:
@@ -164,8 +178,15 @@ while True:
         soup = BeautifulSoup(response.text, "html.parser")
         headlines = [headline.text.strip() for headline in soup.find_all("h3")]
         messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know who you are. {name} asked {user_input}. using these financial headlines aggregate them and answer {name}'s request accordingly and your answers should be somewhat short. : {headlines}"})
-        engine.runAndWait()
     
+    if "do"in user_input and "emails" in user_input:
+        unread = get_num_unread_emails()
+        messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know who you are. {name} asked {user_input}. answer {name}'s request using this info: {name} has {unread} unread emails"})
+    
+    if "read"in user_input and "emails" in user_input: 
+        read = get_subject_lines_unread_emails()
+        messages.append({"role": "assistant", "content": f"{jarvis_personality} now that you know who you are. {name} asked {user_input}. answer the request using this info: in {name}'s inbox here are the subject lines of the emails {read}"})
+        
     
     
     # Check if the user has said "stop"
@@ -206,8 +227,4 @@ while True:
     previous_interactions[len(previous_interactions) + 1] = {'user_input': user_input, 'jarvis_response': response_text}
     
     engine.say(response_text)
-    engine.runAndWait()
-
-    # Speak "Is there anything else?"
-
     engine.runAndWait()

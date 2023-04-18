@@ -14,3 +14,13 @@ tensorflow-estimator==2.6.0
 keras==2.6.0
 Keras-Preprocessing==1.1.2
 beautifulsoup4
+random
+threading
+pygame
+concurrent
+google-api-python-client 
+google-auth-httplib2 
+google-auth-oauthlib
+json
+genderize
+scipy
