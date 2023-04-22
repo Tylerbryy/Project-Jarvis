@@ -1,7 +1,6 @@
-This is my first project i am sharing to the world. 
-i will continue to update this repository with new 
-features and feel free to share the features you 
-come up with.
+Welcome to my first project shared with the world! As an ongoing effort to provide you with the best virtual assistant experience, I will continue to update this repository with new features, bug fixes, and improvements.
+
+Your feedback is important to me, and I encourage you to share any ideas or suggestions you have for future features. Together, we can make this project even better and more useful to our community.
 
 ![Iron Man](ironman.png)
 __________________________________________________
