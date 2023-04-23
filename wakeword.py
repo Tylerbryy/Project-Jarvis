@@ -2,8 +2,6 @@ import pvporcupine
 import pyaudio
 import struct
 import subprocess
-import os
-from dotenv import load_dotenv
 from face_recog import facerec
 import pyttsx3
 import datetime
@@ -14,16 +12,20 @@ import time
 from mail import get_num_unread_emails,get_subject_lines_unread_emails
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from jarvis_config import Jarvis
+import sys
+
+jarvis = Jarvis()
 
 #wakeword API key
-ACCESS_KEY = ""
+ACCESS_KEY = "cfXqAZgu2av82jpfGNZv2tKylD1gSBvV22B+J2tiEhLlIiCJq0KWcA=="
 
 wake_word_file = r"D:\OneDrive\Desktop\Jarvis\wakeword\Jarvis_en_windows_v2_1_0.ppn"
 
 detected_face = facerec()
 
 pygame.init()
-pygame.mixer.music.load('D:\OneDrive\Desktop\Jarvis\Project-Jarvis\wakeword\sound-1_cBqZb05.mp3')
+pygame.mixer.music.load('D:\OneDrive\Desktop\Jarvis\wakeword\sound-1_cBqZb05.mp3')
 pygame.mixer.music.play()
 time.sleep(1)
 
@@ -53,22 +55,22 @@ if gender_of_user(detected_face) == "male":
 else:
     salutation = "ma'am"
 
-#email section
-with ThreadPoolExecutor(max_workers=2) as executor:
-    future1 = executor.submit(get_num_unread_emails)
-    future2 = executor.submit(get_subject_lines_unread_emails)
+# #email section
+# with ThreadPoolExecutor(max_workers=2) as executor:
+#     future1 = executor.submit(get_num_unread_emails)
+#     future2 = executor.submit(get_subject_lines_unread_emails)
 
-    # Wait for both functions to complete
-    results = [future1.result(), future2.result()]
+#     # Wait for both functions to complete
+#     results = [future1.result(), future2.result()]
     
 
-if results[0] > 0 :
-    unread_emails = f'you have {results[0]} new emails'
+# if results[0] > 0 :
+#     unread_emails = f'you have {results[0]} new emails'
     
-else:
-    unread_emails = ""
+# else:
+#     unread_emails = ""
     
-    
+ 
 
 def listen_for_wake_word():
     porcupine = pvporcupine.create(
@@ -88,21 +90,26 @@ def listen_for_wake_word():
         pcm = audio_stream.read(porcupine.frame_length)
         pcm = struct.unpack_from("h" * porcupine.frame_length, pcm)
         keyword_index = porcupine.process(pcm)
-        if keyword_index >= 0:
-            subprocess.run(["python", fr"D:\OneDrive\Desktop\Jarvis\test2.py", detected_face])
-            
-thread = threading.Thread(target=listen_for_wake_word)
-thread.start()
+        if keyword_index >= 0 and detected_face == jarvis.name:
+            subprocess.run(["python", fr"D:\OneDrive\Desktop\Jarvis\main.py", detected_face])
+
+#security         
+if detected_face.lower() != jarvis.name.lower():
+    jarvis.say(f"sorry, you are not {jarvis.name}, you do not have access to jarvis permissions, shutting down Jarvis")
+    sys.exit()        
+else:
+    thread = threading.Thread(target=listen_for_wake_word)
+    thread.start()
 
 #random message upon bootup
 messages_dict = {
-    "message1": f"Good {time_of_day(now)},{detected_face}. The system is now fully operational and standing by.{unread_emails}",
-    "message2": f"Good day, {detected_face}. Jarvis at your service. All systems are online and ready for action.{unread_emails}",
-    "message3": f"System boot complete. Ready for your commands, {salutation}.{unread_emails}",
-    "message4": f"Good {time_of_day(now)}, {salutation}. Shall we begin?{unread_emails}",
-    "message5": f"Greetings, {detected_face}. It’s a pleasure to see you again. Your system is fully optimized and secure.{unread_emails}"
+    "message1": f"Good {time_of_day(now)},{detected_face}. The system is now fully operational and standing by.",
+    "message2": f"Good day, {detected_face}. Jarvis at your service. All systems are online and ready for action.",
+    "message3": f"System boot complete. Ready for your commands, {salutation}.",
+    "message4": f"Good {time_of_day(now)}, {salutation}. Shall we begin?",
+    "message5": f"Greetings, {detected_face}. It’s a pleasure to see you again. Your system is fully optimized and secure."
 }
 
 bootup_message = random.choice(list(messages_dict.values()))
-engine.say(f"{bootup_message}")
-engine.runAndWait()
+jarvis.say(f"{bootup_message}")
+
