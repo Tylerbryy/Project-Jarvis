@@ -1,7 +1,6 @@
-This is my first project i am sharing to the world. 
-i will continue to update this repository with new 
-features and feel free to share the features you 
-come up with.
+Welcome to my first project shared with the world! As an ongoing effort to provide you with the best virtual assistant experience, I will continue to update this repository with new features, bug fixes, and improvements.
+
+Your feedback is important to me, and I encourage you to share any ideas or suggestions you have for future features. Together, we can make this project even better and more useful to our community.
 
 ![Iron Man](ironman.png)
 __________________________________________________
@@ -121,7 +120,11 @@ __________________________________________________
 - More message options for greetings upon bootup will randomly choose one.
 - Has the ability to give you sentiment on the stock market. By aggregating all of them. Then able to answer any question about the market.
 
-
+### Version 5:
+- Added the Jarvis class to the project, providing a streamlined interface for users to interact with the virtual assistant.
+- Improved the functionality of Jarvis, allowing it to perform a variety of tasks, including website lookups, playing YouTube videos, retrieving stock market information, creating art, and executing a morning protocol.
+- The morning protocol feature has been implemented, allowing users to customize the website that Jarvis opens upon activation. Simply say "activate morning protocol" to launch the site of your choice.
+- Overall, version 5 of the Jarvis project provides a more robust and powerful virtual assistant, capable of performing many tasks to simplify and enhance the user's life. We encourage you to try it out and see how it can help you with your daily tasks.
 
 If you have any ideas on some cool stuff to add i would love the feedback!
 
