@@ -18,7 +18,7 @@ import sys
 jarvis = Jarvis()
 
 #wakeword API key
-ACCESS_KEY = "cfXqAZgu2av82jpfGNZv2tKylD1gSBvV22B+J2tiEhLlIiCJq0KWcA=="
+ACCESS_KEY = ""
 
 wake_word_file = r"D:\OneDrive\Desktop\Jarvis\wakeword\Jarvis_en_windows_v2_1_0.ppn"
 
