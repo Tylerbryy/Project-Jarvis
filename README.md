@@ -88,7 +88,7 @@ Replace **/path/to/wakeword.py** with the actual path to the **wakeword.py** scr
 6. Reboot your computer to test if the wakeword.py script runs on startup.
 
 #### All setup!
-Just run the test2.py file
+Just run the wakeword.py file
 __________________________________________________
 
 # Project Jarvis
@@ -127,7 +127,7 @@ __________________________________________________
 - Overall, version 5 of the Jarvis project provides a more robust and powerful virtual assistant, capable of performing many tasks to simplify and enhance the user's life. We encourage you to try it out and see how it can help you with your daily tasks.
 
 If you have any ideas on some cool stuff to add i would love the feedback!
-
+- Implement feature to generate stock charts instantly on command and optimize Jarvis to achieve 11x faster performance, enhancing user experience and enabling more efficient analysis of financial data.
 __________________________________________________
 
 **Oh, don't forget to follow me on my socials.**
