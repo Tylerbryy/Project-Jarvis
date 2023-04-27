@@ -1,47 +1,59 @@
 import cv2
 import face_recognition
+import threading
 import time
+import queue
+from jarvis_config import Jarvis
 
+# Load the known images and encode their face landmarks
+image_of_tyler = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\Tyler.jpg")
+tyler_face_encoding = face_recognition.face_encodings(image_of_tyler)[0]
 
+image_of_elon = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elon.jpg")
+elon_face_encoding = face_recognition.face_encodings(image_of_elon)[0]
+
+image_of_elise = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elise.jpg")
+elise_face_encoding = face_recognition.face_encodings(image_of_elise)[0]
+
+# Create a list of known face encodings and names
+known_face_encodings = [
+    tyler_face_encoding,
+    elon_face_encoding,
+    elise_face_encoding
+]
+
+known_face_names = [
+    "Tyler",
+    "Elon",
+    "Elise"
+]
+
+jarvis = Jarvis()
+
+def face_recognition_thread(rgb_frame, face_locations, face_encodings, my_queue):
+    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+        # See if the face is a match for the known face(s)
+        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        # If a match was found, add the name to the queue
+        if True in matches:
+            match_index = matches.index(True)
+            name = known_face_names[match_index]
+            my_queue.put(name)
+        
 def facerec():
-
-    # Load the known images and encode their face landmarks
-
-    # Tyler
-    image_of_tyler = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\Tyler.jpg")
-    tyler_face_encoding = face_recognition.face_encodings(image_of_tyler)[0]
-
-    # elon
-    image_of_elon = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elon.jpg")
-    elon_face_encoding = face_recognition.face_encodings(image_of_elon)[0]
-
-    image_of_elise = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elise.jpg")
-    elise_face_encoding = face_recognition.face_encodings(image_of_elise)[0]
-
-    # Create a list of known face encodings
-    known_face_encodings = [
-        tyler_face_encoding,
-        elon_face_encoding,
-        elise_face_encoding
-    ]
-
-    # Create a list of known face names
-    known_face_names = [
-        "Tyler",
-        "Elon",
-        "Elise"
-    ]
-
     # Initialize the webcam
     video_capture = cv2.VideoCapture(0)
 
-    # flag to indicate if a name has been detected
-    name_detected = False
+    # Create a queue to hold the detected names
+    my_queue = queue.Queue()
     
-    # Start the timer
-    start_time = time.time()
-    while not name_detected:
+    # Set the detection timeout to 20 seconds
+    detection_timeout = 20
+    detection_start_time = time.time()
+    
+    jarvis.say("Initiating facial recognition. This process may take a moment.")
 
+    while True:
         # Get the current frame
         ret, frame = video_capture.read()
 
@@ -52,26 +64,23 @@ def facerec():
         face_locations = face_recognition.face_locations(rgb_frame)
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
-        # Loop through each face in the current frame
-        for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-            # See if the face is a match for the known face(s)
-            matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+        # Run face recognition in a separate thread
+        face_recognition_thread_obj = threading.Thread(target=face_recognition_thread, args=(rgb_frame, face_locations, face_encodings, my_queue))
+        face_recognition_thread_obj.start()
+        face_recognition_thread_obj.join()
 
-            # If a match was found, return the name
-            if True in matches:
-                match_index = matches.index(True)
-                name = known_face_names[match_index]
-
-                # set the flag variable to True
-                name_detected = True
-
-                # Release the webcam and close the window
-                video_capture.release()
-                return name
-        # Check if the timer has exceeded 10 seconds
-        if time.time() - start_time > 5:
-            return "Tyler"
+        # Check if a name has been detected in the queue
+        if not my_queue.empty():
+            video_capture.release()
+            name = my_queue.get()
+            return name
         
+        # Check if the detection timeout has been reached
+        if time.time() - detection_start_time > detection_timeout:
+            video_capture.release()
+            return "unknown face"
+
+
         # Exit the program if the user presses 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -79,3 +88,5 @@ def facerec():
     # Release the webcam and close the window
     video_capture.release()
     
+    
+

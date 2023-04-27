@@ -7,4 +7,5 @@ YOUR_LONGITUDE = ""
 #openai
 OPEN_AI_APIKEY = ""
 
-#make sure to navigate to wakeword.py and put in your pico key too
+#wakeword API key
+PICOVOICE_API_KEY = ""

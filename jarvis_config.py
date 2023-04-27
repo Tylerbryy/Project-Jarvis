@@ -10,14 +10,19 @@ from keys import *
 from bs4 import BeautifulSoup
 import random
 from mail import get_num_unread_emails, get_subject_lines_unread_emails
-import pygame
-import time
 from genderize import Genderize
 import webbrowser
 from web import play_youtube_video
 from image_creation import generate_image
 import speech_recognition as sr
 import threading
+import pyautogui
+from stockplotter import plot_stock_data
+import torch
+import sounddevice as sd
+import pyaudio
+from num2words import num2words
+
 
 
 
@@ -45,7 +50,7 @@ class Jarvis:
     
     def __init__(self):
         self.openai = openai
-        self.name = "Tyler"
+        self.name = ""
         self.previous_interactions = {}
         self.messages = []
         self.jarvis_personality = f"You are a personal assistant named Jarvis. Your task is to respond to {self.name}'s requests as if you were his personal assistant. Your personality is modeled after the helpful and efficient Jarvis from the Iron Man movies, but you are also capable of adapting your tone to match your user's preferences and needs and should sound natural and conversational."
@@ -61,9 +66,9 @@ class Jarvis:
             "message1": f"Yes, {self.name}?",
             "message2": f"How can I be of service, {self.salutation}?",
             "message3": f"At your service, {self.salutation}.",
-            "message4": f"JARVIS here, {self.name}. How may I be of assistance?",
-            "message5": f"JARVIS online, {self.name}.",
-            "message6": f"Ready and waiting, {self.salutation}."
+            "message5": f"At your command, {self.name}.",
+            "message6": f"Ready and waiting, {self.salutation}.",
+            "message7": f"How can I help?"
             }
         self.weather_api_endpoint = "https://api.openweathermap.org/data/2.5/forecast"
         self.weather_api_key = WEATHER_API_KEY
@@ -71,35 +76,10 @@ class Jarvis:
         self.lat = YOUR_LATITUDE
         self.lon = YOUR_LONGITUDE
         self.openai.api_key = OPEN_AI_APIKEY
+        self.email_password = ""
+        self.email = ""
+        self.supbox = []
         
-    def execute_methods(self):
-        """Executes several methods in separate threads and waits for them to finish.
-
-    This method creates five threads, each running a different method in the current
-    object instance. The methods that are executed are `get_weather`, `check_mood`,
-    `check_stock_market`, `check_emails`, and `read_subject_email`. The threads are
-    started and allowed to run concurrently. The method then waits for all threads to
-    complete before returning.
-        """
-    # create threads for both methods
-        t1 = threading.Thread(target=self.get_weather)
-        t2 = threading.Thread(target=self.check_mood)
-        t3 = threading.Thread(target=self.check_stock_market)
-        t4 = threading.Thread(target=self.check_emails)
-        t5 = threading.Thread(target=self.read_subject_email)
-        # start both threads
-        t1.start()
-        t2.start()
-        t3.start()
-        t4.start()
-        t5.start()
-
-        # wait for all threads to finish
-        t1.join()
-        t2.join()
-        t3.join() 
-        t4.join()
-        t5.join()         
         
 
     def process_input(self, input_text):
@@ -130,12 +110,16 @@ class Jarvis:
         messages=self.messages
         )
         
-        reply = response.choices[0].message.content
-        
-        
-        self.messages.append({"role": "assistant", "content": reply})
-        
+        if len(self.supbox) > 0:
+            reply = "Do you need anything else?"
+            self.supbox.clear()
+               
+        else:
+            reply = response.choices[0].message.content
+            self.messages.append({"role": "assistant", "content": reply})
+            
         return reply
+    
     
     def get_random_greeting(self):
         """
@@ -161,9 +145,47 @@ class Jarvis:
 
         Returns:
             None
-        """        
+        """
+        # device = torch.device('cpu')
+        # torch.set_num_threads(8)
+        # local_file = 'model.pt'
+
+        # if not os.path.isfile(local_file):
+        #     torch.hub.download_url_to_file('https://models.silero.ai/models/tts/en/v3_en.pt',
+        #                                 local_file)  
+
+        # model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
+        # model.to(device)
+        
+        # sample_rate = 48000
+        # speaker='en_30'
+
+        # # Define the PyAudio stream and callback function
+        # pa = pyaudio.PyAudio()
+        # stream = pa.open(format=pyaudio.paFloat32,
+        #                 channels=1,
+        #                 rate=sample_rate,
+        #                 output=True)
+        # def callback(in_data, frame_count, time_info, status):
+        #     data = audio[max(0, int(time_info["output_buffer_dac_time"] * sample_rate)):
+        #                 int((time_info["output_buffer_dac_time"] + frame_count / sample_rate) * sample_rate)]
+        #     return (data.tobytes(), pyaudio.paContinue)
+
+        # # Generate and stream the audio
+        # with torch.no_grad():
+        #     audio = model.apply_tts(text=text,
+        #                             speaker=speaker,
+        #                             sample_rate=sample_rate,
+        #                             put_accent=True,
+        #                             put_yo=True).cpu().numpy()
+        # stream.start_stream()
+        # stream.write(audio.tobytes())
+        # stream.stop_stream()
+        # stream.close()
+        # pa.terminate()
         self.engine.say(text)
         self.engine.runAndWait()
+ 
         
     def get_user_input(self):
         """
@@ -276,9 +298,10 @@ class Jarvis:
             None
         """
         if "do"in self.user_choice and "emails" in self.user_choice:
-            unread = get_num_unread_emails()
-            self.messages.append({"role": "assistant", "content": f"{self.jarvis_personality} now that you know who you are. answer {self.name}'s request using this info: {self.name} has {unread} unread emails"})
-    
+            unread = get_num_unread_emails(email=self.email, password=self.email_password)
+            self.say(f"You currently have {unread} unread emails")
+            self.supbox.append("a")
+            
     def read_subject_email(self):
         """
         Reads the subject lines of unread emails in the user's inbox and adds them to the `messages` list.
@@ -317,12 +340,11 @@ class Jarvis:
             messages=web_list
             )
             web_url = title_response.choices[0].message.content
-            
-            
+            self.supbox.append("a")
             def open_website(url):
              webbrowser.open_new_tab(url)
             open_website(web_url)
-            sys.exit()
+
         
     def morning_protocol(self):
         """
@@ -352,7 +374,7 @@ class Jarvis:
                   webbrowser.open_new_tab(url)
             
             morning_web_protocol(morning_protocol_urls)
-            sys.exit()
+            self.supbox.append("a")
             
     def search_youtube(self): 
         """
@@ -372,7 +394,9 @@ class Jarvis:
             video_choice = self.get_user_input()
             self.say("pulling it up now")
             play_youtube_video(query=video_choice)
-            sys.exit()
+            return False
+        return True
+            
         
     
     def art_mode(self):
@@ -396,7 +420,7 @@ class Jarvis:
             if image_prompt is not None:
                 self.say(f"Generating a masterpiece for you")
                 generate_image(prompt=image_prompt)       
-                sys.exit()
+                self.supbox.append("a")
                 
          
     def check_stop(self):
@@ -409,17 +433,70 @@ class Jarvis:
 
         Returns: None
         """
-        if self.user_choice.lower() == "stop":
+        if self.user_choice.lower() in ["stop", "bye", "no"]:
             self.say("Okay, Goodbye")
-            sys.exit()
-        if self.user_choice.lower() == "bye":
-            self.say("Okay, Goodbye")
-            sys.exit()
-        if self.user_choice.lower() == "no":
-            self.say("Okay, Goodbye")
-            sys.exit()
+            return False
+        return True
             
             
+            
+    def stock_plotter(self):
+        if "stock" in self.user_choice and "chart" in self.user_choice: 
+            self.say(f"What company would you like me to chart")
+            stock_ticker = self.get_user_input()
+            define_stock_gbt = f"Your task is to give me the stock ticker of the company i am talking about. Don't explain anything i just want the ticker that is it. nothing before or after it. THE COMPANY IS : {stock_ticker}"
+            self.say(f"Generating chart now")
+    
+            stock_list = []
+            stock_list.append({"role": "assistant", "content": f"{define_stock_gbt}"})
+            stock_list.append({f"role": "user", "content": f"{self.user_choice}"})
+        
+            stock_response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=stock_list
+            )
+            stock_list_data = stock_response.choices[0].message.content
+            try:
+             plot_stock_data(stock_list_data)
+             self.supbox.append("a")
+             return False
+            except KeyError:
+             self.say("sorry, there was an error in the process of generating the chart")
+             self.supbox.append("a")
+             return False
+        return True
+            
+             
+    def click_screen(self):
+        if "click" in self.user_choice and "screen" in self.user_choice:
+            self.say(f"Okay")
+            x, y = 735, 483
+            pyautogui.click(x, y)
+            self.say(f"clicked the screen, {self.salutation}")
+            self.supbox.append("a")
+            
+        if "click" in self.user_choice and "space" in self.user_choice and "bar" in self.user_choice: 
+            self.say(f"Okay")
+            pyautogui.press('space')
+            pyautogui.sleep(1)
+            pyautogui.keyUp('space') 
+            self.supbox.append("a")
+        if "shutdown" in self.user_choice and "computer" in self.user_choice:
+            self.say("Are you sure you want to shut down the computer?")
+            y_or_no = self.get_user_input().lower()
+            
+            if y_or_no == "yes":
+              os.system("cmd /c shutdown /s /t 1")
+            else:
+              self.say("Didn't get a clear response. Cancelling shut down.")
+              
+            self.supbox.append("a")
+
+            
+            
+    
+            
+
             
 
 

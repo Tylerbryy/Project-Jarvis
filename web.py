@@ -21,7 +21,7 @@ def play_youtube_video(query, wait_time=300):
     driver.get("https://www.google.com")
 
     # find the search box and enter the search query
-    search_box = driver.find_element_by_name("q")
+    search_box = driver.find_element(By.NAME,"q")
     search_box.send_keys(query)
     search_box.send_keys(Keys.RETURN)
 
@@ -29,13 +29,13 @@ def play_youtube_video(query, wait_time=300):
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//a[contains(@href,'youtube.com')]")))
 
     # find the first YouTube video link and click it
-    youtube_link = driver.find_element_by_xpath("//a[contains(@href,'youtube.com')]")
+    youtube_link = driver.find_element(By.XPATH,"//a[contains(@href,'youtube.com')]")
     youtube_link.click()
 
     # wait for the "Skip Ad" button to appear and click it, or print a message if it can't be skipped
     try:
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "ytp-ad-skip-button-text")))
-        skip_button = driver.find_element_by_class_name("ytp-ad-skip-button-text")
+        skip_button = driver.find_element(By.CLASS_NAME, "ytp-ad-skip-button-text")
         skip_button.click()
         engine.say(f"I skipped the ad for you")
         engine.runAndWait()
