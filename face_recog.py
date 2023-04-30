@@ -49,7 +49,7 @@ def facerec(face_scan_sound=False):
     jarvis.say("Initiating facial recognition. This process may take a moment.")
     if face_scan_sound:
         pygame.init()
-        pygame.mixer.music.load(r'wakeword\\facescansound.WAV')
+        pygame.mixer.music.load(r'D:\OneDrive\Desktop\Jarvis\wakeword\facescansound.WAV')
         pygame.mixer.music.play()
     
     while True:

@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Load the face detection model
-face_detection = cv2.CascadeClassifier('face_expression_config\\haar_cascade_face_detection.xml')
+face_detection = cv2.CascadeClassifier(r'D:\OneDrive\Desktop\Jarvis\face_expression_config\haar_cascade_face_detection.xml')
 
 # Load the expression recognition model and labels
-model = keras.models.load_model(r'face_expression_config\\network-5Labels.h5')
+model = keras.models.load_model(r'D:\OneDrive\Desktop\Jarvis\face_expression_config\network-5Labels.h5')
 labels = ['Surprise', 'Neutral', 'Anger', 'Happy', 'Sad']
 
 def detect_expression():
