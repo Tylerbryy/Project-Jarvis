@@ -16,22 +16,20 @@ from mail import get_num_unread_emails
 import sys
 from colorama import init, Fore, Style
 from num2words import num2words
-from keys import PICOVOICE_API_KEY
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 jarvis = Jarvis()
 
 #wakeword API key
-ACCESS_KEY = PICOVOICE_API_KEY
+ACCESS_KEY = os.getenv('PICOVOICE_API_KEY')
 
-#if this model is outdated train a new one on https://picovoice.ai/ takes like 3 mins
-wake_word_file = "D:\\OneDrive\\Desktop\\Jarvis\\wakeword\\jarvis_en_windows_v2_2_0.ppn"
+wake_word_file = os.getenv('jarvis_en_windows_v2_2_0.ppn')
 
-detected_face = facerec()
+detected_face = facerec(face_scan_sound=True)
 
-pygame.init()
-pygame.mixer.music.load(r'D:\OneDrive\Desktop\Jarvis\wakeword\0424.MP3')
-pygame.mixer.music.play()
-time.sleep(1)
 
 engine = pyttsx3.init()
 engine.setProperty('rate', 190)   # setting up new voice rate
@@ -116,7 +114,7 @@ def listen_for_wake_word():
                 
                 if user_input != None:
                     print(Fore.GREEN + f"{detected_face}'s Input: " + Style.RESET_ALL + user_input + '\n')
-        
+                    
                     jarvis.web_search()
                     jarvis.get_weather()
                     jarvis.check_mood()
@@ -126,9 +124,11 @@ def listen_for_wake_word():
                     jarvis.click_screen()
                     jarvis.morning_protocol()
                     jarvis.art_mode()
+                    if not jarvis.check_object_detection():
+                        break
                     if not jarvis.search_youtube():
                         break                    
-                    if not jarvis.stock_plotter():
+                    if not jarvis.stocks():
                         break                    
                     if not jarvis.check_stop():
                         break
@@ -142,6 +142,9 @@ def listen_for_wake_word():
 
 #security         
 if detected_face.lower() != jarvis.name.lower():
+    pygame.init()
+    pygame.mixer.music.load(r'D:\OneDrive\Desktop\Jarvis\wakeword\0428.WAV')
+    pygame.mixer.music.play()
     jarvis.say(f"sorry, you are not {jarvis.name}, you do not have access to jarvis permissions, shutting down Jarvis")
     sys.exit()        
 else:

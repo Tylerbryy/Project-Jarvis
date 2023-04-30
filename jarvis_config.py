@@ -6,7 +6,6 @@ import requests
 from datetime import datetime
 from weatherconfig import get_weather_info
 from facial_expression import detect_expression
-from keys import *
 from bs4 import BeautifulSoup
 import random
 from mail import get_num_unread_emails, get_subject_lines_unread_emails
@@ -22,7 +21,13 @@ import torch
 import sounddevice as sd
 import pyaudio
 from num2words import num2words
-
+import subprocess
+import json
+import numpy as np
+from pathlib import Path
+from object_detection import object_detection
+from dotenv import load_dotenv
+load_dotenv()
 
 
 
@@ -50,10 +55,10 @@ class Jarvis:
     
     def __init__(self):
         self.openai = openai
-        self.name = ""
+        self.name = os.getenv('YOUR_NAME')
         self.previous_interactions = {}
         self.messages = []
-        self.jarvis_personality = f"You are a personal assistant named Jarvis. Your task is to respond to {self.name}'s requests as if you were his personal assistant. Your personality is modeled after the helpful and efficient Jarvis from the Iron Man movies, but you are also capable of adapting your tone to match your user's preferences and needs and should sound natural and conversational."
+        self.jarvis_personality = f"You are a personal assistant named Jarvis. Your task is to respond to {self.name}'s requests as if you were his personal assistant. Your personality is modeled after the helpful and efficient Jarvis from the Iron Man movies, but you are also capable of adapting your tone to match your user's preferences and needs and should sound natural and conversational. If your response requires the use of numbers, please write out the word instead of using the actual numerical value."
         self.genderize = Genderize()
         self.gen_info = self.genderize.get([self.name])[0]
         if self.gen_info['gender'] == 'male':
@@ -70,14 +75,15 @@ class Jarvis:
             "message6": f"Ready and waiting, {self.salutation}.",
             "message7": f"How can I help?"
             }
+        
         self.weather_api_endpoint = "https://api.openweathermap.org/data/2.5/forecast"
-        self.weather_api_key = WEATHER_API_KEY
-        self.city_name = CITY_NAME
-        self.lat = YOUR_LATITUDE
-        self.lon = YOUR_LONGITUDE
-        self.openai.api_key = OPEN_AI_APIKEY
-        self.email_password = ""
-        self.email = ""
+        self.weather_api_key = os.getenv('WEATHER_API_KEY')
+        self.city_name = os.getenv('CITY_NAME')
+        self.lat = os.getenv('YOUR_LATITUDE')
+        self.lon = os.getenv('YOUR_LONGITUDE')
+        self.openai.api_key = os.getenv('OPEN_AI_APIKEY')
+        self.email_password = os.getenv('GMAIL_PASS')
+        self.email = os.getenv('GMAIL_EMAIL')
         self.supbox = []
         
         
@@ -146,19 +152,16 @@ class Jarvis:
         Returns:
             None
         """
-        # device = torch.device('cpu')
+        # device = torch.device('cuda')
         # torch.set_num_threads(8)
-        # local_file = 'model.pt'
-
-        # if not os.path.isfile(local_file):
-        #     torch.hub.download_url_to_file('https://models.silero.ai/models/tts/en/v3_en.pt',
-        #                                 local_file)  
+        # local_file = 'models\\v3_en.pt'
 
         # model = torch.package.PackageImporter(local_file).load_pickle("tts_models", "model")
         # model.to(device)
-        
+
+        # example_text = f'{text}'
         # sample_rate = 48000
-        # speaker='en_30'
+        # speaker='en_103'
 
         # # Define the PyAudio stream and callback function
         # pa = pyaudio.PyAudio()
@@ -166,18 +169,49 @@ class Jarvis:
         #                 channels=1,
         #                 rate=sample_rate,
         #                 output=True)
-        # def callback(in_data, frame_count, time_info, status):
-        #     data = audio[max(0, int(time_info["output_buffer_dac_time"] * sample_rate)):
-        #                 int((time_info["output_buffer_dac_time"] + frame_count / sample_rate) * sample_rate)]
-        #     return (data.tobytes(), pyaudio.paContinue)
+
+        # # Define the cache file path
+        # cache_path = Path('audio_cache.json')
+
+        # # Define the cache dictionary
+        # audio_cache = {}
+
+        # # Load the cache from the file or from memory
+        # if cache_path.exists():
+        #     with open(cache_path, 'r') as f:
+        #         for line in f:
+        #             # Parse each line of the JSON file and add it to the cache
+        #             data = json.loads(line)
+        #             audio_cache.update(data)
+        # else:
+        #     audio_cache = {}
+
+        # # Define the audio generation function
+        # def generate_audio(text):
+        #     if text in audio_cache:
+        #         # Use cached audio if available
+        #         audio = np.array(audio_cache[text], dtype=np.float32)
+                
+        #     else:
+        #         # Generate audio using the PyTorch model
+        #         with torch.no_grad():
+        #             audio = model.apply_tts(text=text,
+        #                                     speaker=speaker,
+        #                                     sample_rate=sample_rate,
+        #                                     put_accent=True,
+        #                                     put_yo=True).cpu().numpy()
+        #         # Add generated audio to the cache
+        #         audio_cache[text] = audio.tolist()
+        #         with open(cache_path, 'a') as f:
+        #             # Write the new data to the end of the JSON file
+        #             json.dump({text: audio.tolist()}, f)
+        #             f.write('\n')  # Add a newline character to separate entries
+
+        #     return audio
 
         # # Generate and stream the audio
         # with torch.no_grad():
-        #     audio = model.apply_tts(text=text,
-        #                             speaker=speaker,
-        #                             sample_rate=sample_rate,
-        #                             put_accent=True,
-        #                             put_yo=True).cpu().numpy()
+        #     audio = generate_audio(example_text)
         # stream.start_stream()
         # stream.write(audio.tobytes())
         # stream.stop_stream()
@@ -185,6 +219,7 @@ class Jarvis:
         # pa.terminate()
         self.engine.say(text)
         self.engine.runAndWait()
+
  
         
     def get_user_input(self):
@@ -248,7 +283,7 @@ class Jarvis:
             self.weather_url = f"https://api.openweathermap.org/data/2.5/weather?lat={self.lat}&lon={self.lon}&appid={self.weather_api_key}"
             response = requests.get(self.weather_url)
             self.weather_data = response.json()
-            self.messages.append({"role": "assistant", "content": f"Here is the all the relevant current weather data. i am going to ask you questions about it and you respond accordingly. Current Weather Data: {get_weather_info(self.weather_data)}."})
+            self.messages.append({"role": "assistant", "content": f"Here is the all the relevant current weather data. i am going to ask you questions about it and you respond accordingly. If your response requires the use of numbers, please write out the word instead of using the actual numerical value.. Current Weather Data: {get_weather_info(self.weather_data)}."})
             
     def check_mood(self):
         """
@@ -266,7 +301,7 @@ class Jarvis:
         """
         if "mood" in self.user_choice or "feeling" in self.user_choice:
             self.emotion = detect_expression()
-            self.messages.append({"role": "assistant", "content": f"{self.jarvis_personality} now that you know who you are. here is {self.name}'s current mood is {self.emotion}. i am going to ask you questions about it and you respond accordingly"})
+            self.messages.append({"role": "assistant", "content": f"{self.jarvis_personality} now that you know who you are. here is {self.name}'s current mood is {self.emotion}. i am going to ask you questions about it and you respond accordingly. If your response requires the use of numbers, please write out the word instead of using the actual numerical value."})
         
 
     def check_stock_market(self):
@@ -284,7 +319,7 @@ class Jarvis:
             response = requests.get(url)
             soup = BeautifulSoup(response.text, "html.parser")
             headlines = [headline.text.strip() for headline in soup.find_all("h3")]
-            self.messages.append({"role": "assistant", "content": f"{self.jarvis_personality} now that you know who you are. using these financial headlines aggregate them and answer {self.name}'s request accordingly and your answers should be somewhat short and don't speak of the headlines. Headlines: {headlines}"})  
+            self.messages.append({"role": "assistant", "content": f"{self.jarvis_personality} now that you know who you are. using these financial headlines aggregate them and answer {self.name}'s request accordingly and your answers should be somewhat short and don't speak of the headlines. If your response requires the use of numbers, please write out the word instead of using the actual numerical value.. Headlines: {headlines}"})  
         
     def check_emails(self):
         """
@@ -440,7 +475,7 @@ class Jarvis:
             
             
             
-    def stock_plotter(self):
+    def stocks(self):
         if "stock" in self.user_choice and "chart" in self.user_choice: 
             self.say(f"What company would you like me to chart")
             stock_ticker = self.get_user_input()
@@ -463,6 +498,11 @@ class Jarvis:
             except KeyError:
              self.say("sorry, there was an error in the process of generating the chart")
              self.supbox.append("a")
+             return False
+         
+        if "stock" in self.user_choice and "terminal" in self.user_choice: 
+             self.say("Initiating stock terminal now")
+             subprocess.run(['start', 'cmd', '/c','D:\\OpenBB\\OpenBBTerminal.exe'],shell=True)
              return False
         return True
             
@@ -491,6 +531,16 @@ class Jarvis:
               self.say("Didn't get a clear response. Cancelling shut down.")
               
             self.supbox.append("a")
+            
+
+    def check_object_detection(self):
+     if "object" in self.user_choice and "detection" in self.user_choice:
+         self.say("initiating object detection")
+         object_detection()
+         return False
+     return True
+    
+
 
             
             

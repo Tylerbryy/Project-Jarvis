@@ -4,31 +4,26 @@ import threading
 import time
 import queue
 from jarvis_config import Jarvis
+import pygame
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
+jarvis = Jarvis()
 # Load the known images and encode their face landmarks
-image_of_tyler = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\Tyler.jpg")
-tyler_face_encoding = face_recognition.face_encodings(image_of_tyler)[0]
+image= face_recognition.load_image_file(f'{os.getenv("IMAGE_OF_YOU")}')
+face_encoding = face_recognition.face_encodings(image)[0]
 
-image_of_elon = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elon.jpg")
-elon_face_encoding = face_recognition.face_encodings(image_of_elon)[0]
-
-image_of_elise = face_recognition.load_image_file(r"D:\OneDrive\Desktop\Jarvis\wakeword\known_faces\elise.jpg")
-elise_face_encoding = face_recognition.face_encodings(image_of_elise)[0]
 
 # Create a list of known face encodings and names
 known_face_encodings = [
-    tyler_face_encoding,
-    elon_face_encoding,
-    elise_face_encoding
+    face_encoding
 ]
 
 known_face_names = [
-    "Tyler",
-    "Elon",
-    "Elise"
+    f"{os.getenv('YOUR_NAME')}"
 ]
 
-jarvis = Jarvis()
 
 def face_recognition_thread(rgb_frame, face_locations, face_encodings, my_queue):
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
@@ -40,7 +35,7 @@ def face_recognition_thread(rgb_frame, face_locations, face_encodings, my_queue)
             name = known_face_names[match_index]
             my_queue.put(name)
         
-def facerec():
+def facerec(face_scan_sound=False):
     # Initialize the webcam
     video_capture = cv2.VideoCapture(0)
 
@@ -52,7 +47,11 @@ def facerec():
     detection_start_time = time.time()
     
     jarvis.say("Initiating facial recognition. This process may take a moment.")
-
+    if face_scan_sound:
+        pygame.init()
+        pygame.mixer.music.load(r'wakeword\\facescansound.WAV')
+        pygame.mixer.music.play()
+    
     while True:
         # Get the current frame
         ret, frame = video_capture.read()

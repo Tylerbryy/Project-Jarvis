@@ -7,25 +7,22 @@ __________________________________________________
 
 # Installation
 
-### A Virtual Environment is NOT recommended for this project
-insert relevant API Keys and Info into keys.py file
+### Create a Virtual Environment
+``python -m venv myenv``
+
+then
+
+``myenv\Scripts\activate.bat``
+
+
+navigate to the root directory and install requirements ``pip install -r requirements.txt``
+follow the directions in the ``.env`` file
 
 ### Sign up for the weather api and get your longitude and latitude
 sign up here https://api.openweathermap.org
 
 find your lat and long here https://www.latlong.net
 put them in the relevant place in the keys.py file
-
-### For the wake word to work
-Sign up for the picoai api at https://picovoice.ai/
-
-then train your own model using this link https://console.picovoice.ai/ppn (By default i have the Windows (x86_64) version already trained in the wakeword folder)
-
-then copy and paste it in the relevant position in the wakeword.py file
-
-This file will be the one you set to start on bootup 
-
-look in the wakeword.py file and replace my local paths with your locals paths to the same file
 
 ## Setting up to run on startup
 
@@ -39,7 +36,7 @@ look in the wakeword.py file and replace my local paths with your locals paths t
 
 4. In the shell script, type the following command to run the wakeword.py script:
 
-``/usr/bin/python /path/to/wakeword.py``
+``/usr/bin/python /path/to/wakeword.py`` (this will vary if you are using a virtual environment you would update the ``/usr/bin/python`` to your virtual environment python)
 
 Replace **/path/to/wakeword.py** with the actual path to the **wakeword.py** script on your computer.
 
@@ -128,6 +125,7 @@ __________________________________________________
 
 If you have any ideas on some cool stuff to add i would love the feedback!
 - Implement feature to generate stock charts instantly on command and optimize Jarvis to achieve 11x faster performance, enhancing user experience and enabling more efficient analysis of financial data.
+- Object detection mode
 __________________________________________________
 
 **Oh, don't forget to follow me on my socials.**
@@ -140,6 +138,5 @@ https://www.tiktok.com/@tylergbbs
 
 **Twitter**
 https://twitter.com/tylerbryy 
-
 
 

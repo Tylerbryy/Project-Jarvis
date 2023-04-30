@@ -1,11 +1,15 @@
 import requests
 import json
-from keys import *
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-weather_api_key = WEATHER_API_KEY
-city_name = CITY_NAME
-lat = YOUR_LATITUDE
-lon = YOUR_LONGITUDE
+
+
+weather_api_key = os.getenv('WEATHER_API_KEY')
+city_name = os.getenv('CITY_NAME')
+lat = os.getenv('YOUR_LATITUDE')
+lon = os.getenv('YOUR_LONGITUDE')
 
 url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={weather_api_key}"
 response = requests.get(url)

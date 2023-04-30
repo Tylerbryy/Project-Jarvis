@@ -3,10 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 from googlesearch import search
 import openai
-from keys import OPEN_AI_APIKEY
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
-openai.api_key = OPEN_AI_APIKEY
+openai.api_key = os.getenv("OPEN_AI_APIKEY")
 
 def search_and_scrape(query):
     q=[]

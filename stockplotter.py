@@ -2,11 +2,14 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+import os 
+from dotenv import load_dotenv
+load_dotenv()
 
 def plot_stock_data(symbol):
     matplotlib.use('WXAgg')
     # Define API parameters
-    api_key = "CZY670E5HFXYKK3D" # Replace with your API key
+    api_key = os.getenv("ALPHAVANTAGE_KEY") # Replace with your API key
     function = "TIME_SERIES_DAILY_ADJUSTED" # Time series function
     output_size = "compact" # Compact output size (last 100 data points)
 
