@@ -9,3 +9,4 @@ OPEN_AI_APIKEY = ""
 
 #wakeword API key
 PICOVOICE_API_KEY = ""
+'wegwg'
